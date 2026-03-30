@@ -1,14 +1,13 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-import json
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(page_title="MOSFET Virtual Lab", layout="wide")
 
-# ------------------ CUSTOM CSS ------------------
+# ------------------ CSS ------------------
 st.markdown("""
 <style>
 body {
@@ -26,9 +25,12 @@ h1, h2, h3 {
 </style>
 """, unsafe_allow_html=True)
 
-# ------------------ SIDEBAR NAV ------------------
+# ------------------ SIDEBAR ------------------
 st.sidebar.title("🔬 MOSFET Lab")
-page = st.sidebar.radio("Navigate", ["Dashboard", "Aim & Theory", "Experiment", "Quiz", "Feedback"])
+page = st.sidebar.radio(
+    "Navigate",
+    ["Dashboard", "Aim & Theory", "Experiment", "Quiz", "Feedback"]
+)
 
 # ------------------ DASHBOARD ------------------
 if page == "Dashboard":
@@ -76,7 +78,7 @@ elif page == "Aim & Theory":
     - Power electronics  
     """)
 
-# ------------------ PDF GENERATOR ------------------
+# ------------------ PDF FUNCTION ------------------
 def generate_pdf(Vgs, Vt, k):
     file_name = "mosfet_report.pdf"
     doc = SimpleDocTemplate(file_name)
@@ -108,9 +110,9 @@ elif page == "Experiment":
         if Vgs <= Vt:
             Id.append(0)
         elif v < (Vgs - Vt):
-            Id.append(k * ((Vgs - Vt)*v - (v**2)/2))
+            Id.append(k * ((Vgs - Vt) * v - (v**2) / 2))
         else:
-            Id.append(k * (Vgs - Vt)**2)
+            Id.append(k * (Vgs - Vt) ** 2)
 
     Id = np.array(Id)
 
@@ -131,31 +133,35 @@ elif page == "Experiment":
         pdf_file = generate_pdf(Vgs, Vt, k)
 
         with open(pdf_file, "rb") as f:
-            st.download_button("⬇ Download PDF", f, file_name="mosfet_report.pdf")
+            st.download_button(
+                label="⬇ Download PDF",
+                data=f,
+                file_name="mosfet_report.pdf"
+            )
 
 # ------------------ QUIZ ------------------
 elif page == "Quiz":
     st.title("🧠 MOSFET Quiz")
 
     questions = [
-        {"question": "MOSFET is a ___ controlled device?", "options": ["Current", "Voltage", "Power", "Resistance"], "answer": "Voltage"},
-        {"question": "MOSFET stands for?", "options": ["Metal Oxide Semiconductor Field Effect Transistor", "Micro System", "None"], "answer": "Metal Oxide Semiconductor Field Effect Transistor"},
-        {"question": "Which terminal controls current?", "options": ["Gate", "Drain", "Source"], "answer": "Gate"},
-        {"question": "Cutoff region current?", "options": ["Zero", "High"], "answer": "Zero"},
-        {"question": "Vt means?", "options": ["Threshold voltage", "Test voltage"], "answer": "Threshold voltage"},
-        {"question": "MOSFET used as switch?", "options": ["Yes", "No"], "answer": "Yes"},
-        {"question": "Drain current symbol?", "options": ["Id", "Ig"], "answer": "Id"},
-        {"question": "MOSFET type?", "options": ["N-channel", "P-channel", "Both"], "answer": "Both"},
-        {"question": "Device control type?", "options": ["Voltage", "Current"], "answer": "Voltage"},
-        {"question": "Region for amplification?", "options": ["Saturation", "Cutoff"], "answer": "Saturation"}
+        {"q": "MOSFET is a ___ controlled device?", "opt": ["Current", "Voltage", "Power", "Resistance"], "ans": "Voltage"},
+        {"q": "MOSFET stands for?", "opt": ["Metal Oxide Semiconductor Field Effect Transistor", "Micro System"], "ans": "Metal Oxide Semiconductor Field Effect Transistor"},
+        {"q": "Which terminal controls current?", "opt": ["Gate", "Drain", "Source"], "ans": "Gate"},
+        {"q": "Cutoff region current?", "opt": ["Zero", "High"], "ans": "Zero"},
+        {"q": "Vt means?", "opt": ["Threshold voltage", "Test voltage"], "ans": "Threshold voltage"},
+        {"q": "MOSFET used as switch?", "opt": ["Yes", "No"], "ans": "Yes"},
+        {"q": "Drain current symbol?", "opt": ["Id", "Ig"], "ans": "Id"},
+        {"q": "MOSFET type?", "opt": ["N-channel", "P-channel", "Both"], "ans": "Both"},
+        {"q": "Device control type?", "opt": ["Voltage", "Current"], "ans": "Voltage"},
+        {"q": "Region for amplification?", "opt": ["Saturation", "Cutoff"], "ans": "Saturation"}
     ]
 
     score = 0
 
     for i, q in enumerate(questions):
-        st.subheader(f"Q{i+1}: {q['question']}")
-        ans = st.radio("", q["options"], key=i)
-        if ans == q["answer"]:
+        st.subheader(f"Q{i+1}: {q['q']}")
+        ans = st.radio("Select answer", q["opt"], key=i)
+        if ans == q["ans"]:
             score += 1
 
     if st.button("Submit Quiz"):
